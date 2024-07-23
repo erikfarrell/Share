@@ -1,0 +1,9 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name="pietimes-order-posgateway"
+region="us-east-2"
+s3_bucket="codedeploybucket-4ezqkos1bpst"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+parameter_overrides = [
+]

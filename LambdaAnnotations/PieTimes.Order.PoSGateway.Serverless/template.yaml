@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v1.3.0.0).
+Parameters:
+  Region:
+    Description: AWS Region
+    Type: String
+    Default: us-east-2
+  AccountID:
+    Description: AWS Account ID
+    Type: String
+    Default: 877822549379
+  ProgramName:
+    Description: Brand Identifier
+    Type: String
+    Default: PieTimes
+  VerticalName:
+    Description: Vertical Name
+    Type: String
+    Default: Order
+  UniqueIdentifier:
+    Description: Unique Identifier for PieTimes
+    Type: String
+    Default: ONAsF9Rv26
+Resources:
+  PieTimesOrderPoSGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: PieTimesGateway-ONAsF9Rv26
+      StageName: live
+  PoSGatewayFunctionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub "${ProgramName}-${VerticalName}-PoSGatewayFunctionRole-${UniqueIdentifier}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: PoSGatewayFunctionRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - '*'
+                Resource: '*'
+  PoSGatewayDefaultServerlessFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProgramName}-${VerticalName}-PoSGatewayDefault-${UniqueIdentifier}"
+      RetentionInDays: 14
+  PoSGatewayDefaultServerlessFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: PoSGatewayDefaultServerlessFunctionLogGroup
+    Metadata:
+      Tool: Amazon.Lambda.Annotations
+      SyncedEvents:
+        - RootGet
+    Properties:
+      FunctionName: !Sub "${ProgramName}-${VerticalName}-PoSGatewayDefault-${UniqueIdentifier}"
+      Runtime: dotnet8
+      CodeUri: .
+      MemorySize: 512
+      Timeout: 30
+      Tracing: Active
+      AutoPublishAlias: live
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      PackageType: Zip
+      Handler: PieTimes.Order.PoSGateway.Serverless::PieTimes.Order.PoSGateway.Serverless.Functions_Default_Generated::Default
+      LoggingConfig:
+        LogGroup: !Ref PoSGatewayDefaultServerlessFunctionLogGroup
+      Events:
+        RootGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PieTimesOrderPoSGateway
+            Path: /
+            Method: GET
+  PoSGatewaySubmitOrderServerlessFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProgramName}-${VerticalName}-PoSGatewaySubmitOrder-${UniqueIdentifier}"
+      RetentionInDays: 14
+  PoSGatewaySubmitOrderServerlessFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: PoSGatewaySubmitOrderServerlessFunctionLogGroup
+    Metadata:
+      Tool: Amazon.Lambda.Annotations
+      SyncedEvents:
+        - RootPost
+    Properties:
+      FunctionName: !Sub "${ProgramName}-${VerticalName}-PoSGatewaySubmitOrder-${UniqueIdentifier}"
+      Runtime: dotnet8
+      CodeUri: .
+      Role:
+        Fn::GetAtt:
+          - PoSGatewayFunctionRole
+          - Arn
+      MemorySize: 512
+      Timeout: 30
+      Tracing: Active
+      AutoPublishAlias: live
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      PackageType: Zip
+      Handler: PieTimes.Order.PoSGateway.Serverless::PieTimes.Order.PoSGateway.Serverless.Functions_SubmitOrder_Generated::SubmitOrder
+      Events:
+        RootPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PieTimesOrderPoSGateway
+            Path: /SubmitOrder
+            Method: POST
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: !Sub "${ProgramName}-${VerticalName}-PoSGatewaySubmitOrder-${UniqueIdentifier}"
+          POWERTOOLS_METRICS_NAMESPACE: !Sub "${ProgramName}"
+          POWERTOOLS_LOG_LEVEL: Debug
+          POWERTOOLS_LOGGER_CASE: PascalCase
+  PoSGatewayGetOrderServerlessFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProgramName}-${VerticalName}-PoSGatewayGetOrder-${UniqueIdentifier}"
+      RetentionInDays: 14
+  PoSGatewayGetOrderServerlessFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: PoSGatewayGetOrderServerlessFunctionLogGroup
+    Metadata:
+      Tool: Amazon.Lambda.Annotations
+      SyncedEvents:
+        - RootGet
+    Properties:
+      FunctionName: !Sub "${ProgramName}-${VerticalName}-PoSGatewayGetOrder-${UniqueIdentifier}"
+      Runtime: dotnet8
+      CodeUri: .
+      Role:
+        Fn::GetAtt:
+          - PoSGatewayFunctionRole
+          - Arn
+      MemorySize: 512
+      Timeout: 30
+      Tracing: Active
+      AutoPublishAlias: live
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      PackageType: Zip
+      Handler: PieTimes.Order.PoSGateway.Serverless::PieTimes.Order.PoSGateway.Serverless.Functions_GetOrder_Generated::GetOrder
+      Events:
+        RootGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PieTimesOrderPoSGateway
+            Path: /Order/{orderId}
+            Method: GET
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: !Sub "${ProgramName}-${VerticalName}-PoSGatewaySubmitOrder-${UniqueIdentifier}"
+          POWERTOOLS_METRICS_NAMESPACE: !Sub "${ProgramName}"
+          POWERTOOLS_LOG_LEVEL: Debug
+          POWERTOOLS_LOGGER_CASE: PascalCase
