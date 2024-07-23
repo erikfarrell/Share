@@ -106,4 +106,4 @@ After `[LambdaStartup]` this is probably my second favorite feature.
 - If you use `[RestApi]` and you have `AutoPublishAlias` on your lambda, your generated API is smart enough to use your alias.
 - You can use lambda annotations on a non-gateway lambdas (with the obvious exception of the `[RestApi]`/`[HttpApi]` parameter). This might suggest some alternative organizational structures at your disposal - such as placing multiple lambda functions in the same project and stack as facades.
   - This could be a maintenance benefit, maintaining deployment/practical decoupling of lambdas but allowing them to ride alongside each other in projects and repositories
-  - You get to leverage nice things like `[LambdaStartup]` as a cleaner injection philosophy.
+  - You get to leverage nice things like `[LambdaStartup]` as a cleaner injection philosophy than other available paradigms
